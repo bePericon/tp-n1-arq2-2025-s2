@@ -7,10 +7,8 @@ import { corsOptions } from './config/cors';
 import logger from 'jet-logger';
 import customServer from 'express-promise-router';
 import cookieParser from 'cookie-parser';
-import config from './config/config';
-import mongoose from 'mongoose';
-import { UserController } from './infrastructure/controllers/user.controller';
-import { connectMongoDB } from './infrastructure/database/mongo-config';
+import { UserController } from './users/infrastructure/controllers/user.controller';
+import { connectMongoDB } from './config/database/mongo-config';
 
 export class ServerApp extends Server {
 	private readonly STARTED_MSG = 'Server running on port: ';
