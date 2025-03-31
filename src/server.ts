@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import config from './config/config';
 import mongoose from 'mongoose';
 import { UserController } from './infrastructure/controllers/user.controller';
+import { connectMongoDB } from './infrastructure/database/mongo-config';
 
 export class ServerApp extends Server {
 	private readonly STARTED_MSG = 'Server running on port: ';
@@ -30,7 +31,7 @@ export class ServerApp extends Server {
 
 		// this.app.use(errorMiddleware);
 
-		this.initConnectionDB();
+		connectMongoDB()
 	}
 
 	private morganJsonFormat(
@@ -54,13 +55,6 @@ export class ServerApp extends Server {
 	private setupControllers(): void {
 		const userController = new UserController();
 		super.addControllers([userController], customServer);
-	}
-
-	private async initConnectionDB(): Promise<void> {
-		const CONN_STR = config.mongo_db_connection_string as string;
-		console.log('🚀 ~ ServerApp ~ initConnectionDB ~ CONN_STR:', CONN_STR);
-		const db = await mongoose.connect(CONN_STR);
-		console.log('Data base is connect: ' + db.connection.name);
 	}
 
 	public getApp(): Application {
