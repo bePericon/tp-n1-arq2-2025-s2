@@ -24,122 +24,96 @@ export class ProductController {
 
 	@Post('')
 	async createProduct(req: Request, res: Response): Promise<Response> {
-		try {
-			const createProductDto: CreateProductDto = req.body;
-			const productDto = await this.productService.createProduct(createProductDto);
-			await this.sellerService.addProductToSeller(productDto.sellerId, productDto.productId as string);
-			return res
-				.status(StatusCodes.CREATED)
-				.json(new ApiResponse('Producto creado', StatusCodes.CREATED, productDto));
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error creating product' });
-		}
+		const createProductDto: CreateProductDto = req.body;
+		const productDto = await this.productService.createProduct(createProductDto);
+		await this.sellerService.addProductToSeller(
+			productDto.sellerId,
+			productDto.productId as string
+		);
+		return res
+			.status(StatusCodes.CREATED)
+			.json(new ApiResponse('Producto creado', StatusCodes.CREATED, productDto));
 	}
 
 	@Get(':id')
 	async getProductById(req: Request, res: Response): Promise<Response> {
-		try {
-			if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-				const productId = req.params.id;
-				const product = await this.productService.getProductById(productId);
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const productId = req.params.id;
+			const product = await this.productService.getProductById(productId);
 
-				if (!product) {
-					return res
-						.status(StatusCodes.NOT_FOUND)
-						.json(
-							new ApiResponse(
-								'Producto no encontrado',
-								StatusCodes.NOT_FOUND,
-								product
-							)
-						);
-				}
-
+			if (!product) {
 				return res
-					.status(StatusCodes.OK)
-					.json(new ApiResponse('Producto encontrado', StatusCodes.OK, product));
+					.status(StatusCodes.NOT_FOUND)
+					.json(
+						new ApiResponse(
+							'Producto no encontrado',
+							StatusCodes.NOT_FOUND,
+							product
+						)
+					);
 			}
 
 			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json(
-					new ApiResponse(
-						'Formato de Id incorrecto',
-						StatusCodes.BAD_REQUEST,
-						null
-					)
-				);
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error fetching tasks' });
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Producto encontrado', StatusCodes.OK, product));
 		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 
 	@Put(':id')
 	async updateProduct(req: Request, res: Response): Promise<Response> {
-		try {
-			if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-				const productId = req.params.id;
-				const updateProductDto: CreateProductDto = req.body;
-				const product = await this.productService.updateProduct(productId, updateProductDto);
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const productId = req.params.id;
+			const updateProductDto: CreateProductDto = req.body;
+			const product = await this.productService.updateProduct(
+				productId,
+				updateProductDto
+			);
 
-				if (!product) {
-					return res
-						.status(StatusCodes.NOT_FOUND)
-						.json(
-							new ApiResponse(
-								'Producto no encontrado',
-								StatusCodes.NOT_FOUND,
-								product
-							)
-						);
-				}
-
+			if (!product) {
 				return res
-					.status(StatusCodes.OK)
-					.json(new ApiResponse('Producto actualizado', StatusCodes.OK, product));
+					.status(StatusCodes.NOT_FOUND)
+					.json(
+						new ApiResponse(
+							'Producto no encontrado',
+							StatusCodes.NOT_FOUND,
+							product
+						)
+					);
 			}
 
 			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json(
-					new ApiResponse(
-						'Formato de Id incorrecto',
-						StatusCodes.BAD_REQUEST,
-						null
-					)
-				);
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error updating product' });
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Producto actualizado', StatusCodes.OK, product));
 		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 
 	@Delete(':id')
 	async deleteProduct(req: Request, res: Response): Promise<Response> {
-		try {
-			if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-				const productId = req.params.id;
-				await this.productService.deleteProduct(productId);
-
-				return res
-					.status(StatusCodes.OK)
-					.json(new ApiResponse('Producto eliminado', StatusCodes.OK, null));
-			}
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const productId = req.params.id;
+			await this.productService.deleteProduct(productId);
 
 			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json(
-					new ApiResponse(
-						'Formato de Id incorrecto',
-						StatusCodes.BAD_REQUEST,
-						null
-					)
-				);
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error deleting product' });
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Producto eliminado', StatusCodes.OK, null));
 		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 }

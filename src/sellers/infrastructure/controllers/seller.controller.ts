@@ -18,121 +18,92 @@ export class SellerController {
 
 	@Post('')
 	async createSeller(req: Request, res: Response): Promise<Response> {
-		try {
-			const createSellerDto: CreateSellerDto = req.body;
-			const sellerDto = await this.sellerService.createSeller(createSellerDto);
-			return res
-				.status(StatusCodes.CREATED)
-				.json(new ApiResponse('Vendedor creado', StatusCodes.CREATED, sellerDto));
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error creating seller' });
-		}
+		const createSellerDto: CreateSellerDto = req.body;
+		const sellerDto = await this.sellerService.createSeller(createSellerDto);
+		return res
+			.status(StatusCodes.CREATED)
+			.json(new ApiResponse('Vendedor creado', StatusCodes.CREATED, sellerDto));
 	}
 
 	@Get(':id')
 	async getSellerById(req: Request, res: Response): Promise<Response> {
-		try {
-			if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-				const sellerId = req.params.id;
-				const seller = await this.sellerService.getSellerById(sellerId);
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const sellerId = req.params.id;
+			const seller = await this.sellerService.getSellerById(sellerId);
 
-				if (!seller) {
-					return res
-						.status(StatusCodes.NOT_FOUND)
-						.json(
-							new ApiResponse(
-								'Vendedor no encontrado',
-								StatusCodes.NOT_FOUND,
-								seller
-							)
-						);
-				}
-
+			if (!seller) {
 				return res
-					.status(StatusCodes.OK)
-					.json(new ApiResponse('Vendedor encontrado', StatusCodes.OK, seller));
+					.status(StatusCodes.NOT_FOUND)
+					.json(
+						new ApiResponse(
+							'Vendedor no encontrado',
+							StatusCodes.NOT_FOUND,
+							seller
+						)
+					);
 			}
 
 			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json(
-					new ApiResponse(
-						'Formato de Id incorrecto',
-						StatusCodes.BAD_REQUEST,
-						null
-					)
-				);
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error fetching tasks' });
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Vendedor encontrado', StatusCodes.OK, seller));
 		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 
 	@Put(':id')
 	async updateSeller(req: Request, res: Response): Promise<Response> {
-		try {
-			if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-				const sellerId = req.params.id;
-				const updateSellerDto: CreateSellerDto = req.body;
-				const seller = await this.sellerService.updateSeller(sellerId, updateSellerDto);
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const sellerId = req.params.id;
+			const updateSellerDto: CreateSellerDto = req.body;
+			const seller = await this.sellerService.updateSeller(
+				sellerId,
+				updateSellerDto
+			);
 
-				if (!seller) {
-					return res
-						.status(StatusCodes.NOT_FOUND)
-						.json(
-							new ApiResponse(
-								'Vendedor no encontrado',
-								StatusCodes.NOT_FOUND,
-								seller
-							)
-						);
-				}
-
+			if (!seller) {
 				return res
-					.status(StatusCodes.OK)
-					.json(new ApiResponse('Vendedor actualizado', StatusCodes.OK, seller));
+					.status(StatusCodes.NOT_FOUND)
+					.json(
+						new ApiResponse(
+							'Vendedor no encontrado',
+							StatusCodes.NOT_FOUND,
+							seller
+						)
+					);
 			}
 
 			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json(
-					new ApiResponse(
-						'Formato de Id incorrecto',
-						StatusCodes.BAD_REQUEST,
-						null
-					)
-				);
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error updating seller' });
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Vendedor actualizado', StatusCodes.OK, seller));
 		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 
 	@Delete(':id')
 	async deleteSeller(req: Request, res: Response): Promise<Response> {
-		try {
-			if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-				const sellerId = req.params.id;
-				await this.sellerService.deleteSeller(sellerId);
-
-				return res
-					.status(StatusCodes.OK)
-					.json(new ApiResponse('Vendedor eliminado', StatusCodes.OK, null));
-			}
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const sellerId = req.params.id;
+			await this.sellerService.deleteSeller(sellerId);
 
 			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json(
-					new ApiResponse(
-						'Formato de Id incorrecto',
-						StatusCodes.BAD_REQUEST,
-						null
-					)
-				);
-		} catch (error) {
-			console.error(error);
-			return res.status(500).send({ message: 'Error deleting seller' });
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Vendedor eliminado', StatusCodes.OK, null));
 		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 }

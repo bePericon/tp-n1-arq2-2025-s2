@@ -11,6 +11,7 @@ import { UserController } from './users/infrastructure/controllers/user.controll
 import { connectMongoDB } from './config/database/mongo-config';
 import { SellerController } from './sellers/infrastructure/controllers/seller.controller';
 import { ProductController } from './sellers/infrastructure/controllers/product.controller';
+import errorMiddleware from './shared/infrastrurcture/error.middleware';
 
 export class ServerApp extends Server {
 	private readonly STARTED_MSG = 'Server running on port: ';
@@ -26,10 +27,9 @@ export class ServerApp extends Server {
 			res.header('Access-Control-Allow-Credentials', 'true');
 			next();
 		});
-
+		this.app.use(errorMiddleware);
+		
 		this.setupControllers();
-
-		// this.app.use(errorMiddleware);
 
 		connectMongoDB();
 	}
