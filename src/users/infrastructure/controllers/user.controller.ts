@@ -4,7 +4,7 @@ import { UserService } from '../../application/services/user-service';
 import { MongoUserRepository } from '../repositories/mongo-user.repository';
 import { CreateUserDto } from '../../application/dtos/create-user.dto';
 import { StatusCodes } from 'http-status-codes';
-import ApiResponse from '../../domain/value-objects/api-response';
+import ApiResponse from '../../../shared/domain/value-objects/api-response';
 import mongoose from 'mongoose';
 
 @Controller('api/users')

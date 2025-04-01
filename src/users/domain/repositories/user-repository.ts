@@ -1,5 +1,4 @@
 import { User } from '../entities/user';
-// import { UserId } from '../value-objects/user-id';
 
 export interface UserRepository {
 	save(User: User): Promise<User>;
