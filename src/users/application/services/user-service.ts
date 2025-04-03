@@ -49,7 +49,7 @@ export class UserService implements UserUseCase {
 
 	private mapToUserDto(user: User): UserDto {
 		return {
-			userId: user._id.getValue(),
+			userId: user._id,
 			name: user.name,
 			lastName: user.lastName,
 			mail: user.mail,

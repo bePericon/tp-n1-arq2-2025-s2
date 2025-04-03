@@ -28,7 +28,7 @@ export class MongoUserRepository implements UserRepository {
 	async update(user: User): Promise<User> {
 		await userModel
 			.findByIdAndUpdate(
-				user._id.getValue(),
+				user._id,
 				{
 					name: user.name,
 					lastName: user.lastName,

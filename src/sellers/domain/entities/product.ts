@@ -14,7 +14,6 @@ export class Product {
 	public price: number;
 	public stock: number;
 	public sellerId: string;
-	
 
 	constructor(props: ProductProps) {
 		this._id = props._id;
@@ -23,5 +22,9 @@ export class Product {
 		this.price = props.price;
 		this.stock = props.stock;
 		this.sellerId = props.sellerId;
+	}
+
+	decrease(quantity: number): void {
+		this.stock -= quantity;
 	}
 }

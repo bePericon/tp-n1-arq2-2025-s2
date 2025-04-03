@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import ApiResponse from '../../../shared/domain/value-objects/api-response';
 import { SellerService } from '../../application/services/seller-service';
 import { MongoSellerRepository } from '../repositories/mongo-seller.repository';
+import '../event-handlers/purchase-created.handler'
 
 @Controller('api/products')
 export class ProductController {
@@ -108,6 +109,49 @@ export class ProductController {
 			return res
 				.status(StatusCodes.OK)
 				.json(new ApiResponse('Producto eliminado', StatusCodes.OK, null));
+		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
+	}
+
+	@Post(':id/purchase')
+	async purchaseProduct(req: Request, res: Response): Promise<Response> {
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const productId = req.params.id;
+			const quantity = req.body.quantity;
+			const product = await this.productService.getProductById(productId);
+
+			if (!product) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json(
+						new ApiResponse(
+							'Producto no encontrado',
+							StatusCodes.NOT_FOUND,
+							product
+						)
+					);
+			}
+
+			if (product.stock < quantity) {
+				return res
+					.status(StatusCodes.BAD_REQUEST)
+					.json(
+						new ApiResponse(
+							'No hay suficiente stock',
+							StatusCodes.BAD_REQUEST,
+							product
+						)
+					);
+			}
+
+			return res
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Hay suficiente stock', StatusCodes.OK, product));
 		}
 
 		return res

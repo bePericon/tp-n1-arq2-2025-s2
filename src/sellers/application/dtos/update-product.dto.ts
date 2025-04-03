@@ -3,4 +3,5 @@ export interface UpdateProductDto {
 	description: string;
 	price: number;
 	stock: number;
+	sellerId: string;
 }
