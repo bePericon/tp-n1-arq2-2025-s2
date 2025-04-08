@@ -9,6 +9,8 @@ import { UpdateProductDto } from '../dtos/update-product.dto';
 import { UpdateProduct } from '../../domain/use-cases/update-product';
 import { DeleteProduct } from '../../domain/use-cases/delete-product';
 import { DecreaseStock } from '../../domain/use-cases/decrease-stock';
+import { SearchProductsByName } from '../../domain/use-cases/search-products-by-name';
+import { FilterProductsByPrice, PriceFilter } from '../../domain/use-cases/filter-products-by-price';
 
 export class ProductService implements ProductUseCase {
 	private readonly createProductUseCase: CreateProduct;
@@ -16,6 +18,8 @@ export class ProductService implements ProductUseCase {
 	private readonly updateProductUseCase: UpdateProduct;
 	private readonly deleteProductUseCase: DeleteProduct;
 	private readonly decreaseStockUseCase: DecreaseStock;
+	private readonly searchProductsByNameUseCase: SearchProductsByName;
+	private readonly filterProductsByPriceUseCase: FilterProductsByPrice;	
 
 	constructor(readonly productRepository: ProductRepository) {
 		this.createProductUseCase = new CreateProduct(productRepository);
@@ -23,6 +27,8 @@ export class ProductService implements ProductUseCase {
 		this.updateProductUseCase = new UpdateProduct(productRepository);
 		this.deleteProductUseCase = new DeleteProduct(productRepository);
 		this.decreaseStockUseCase = new DecreaseStock(productRepository);
+		this.searchProductsByNameUseCase = new SearchProductsByName(productRepository);	
+		this.filterProductsByPriceUseCase = new FilterProductsByPrice(productRepository);
 	}
 
 	async createProduct(createProductDto: CreateProductDto): Promise<ProductDto> {
@@ -58,6 +64,16 @@ export class ProductService implements ProductUseCase {
 	async decreaseStock(productId: string, quantity: number): Promise<void> {
 		await this.decreaseStockUseCase.execute(productId, quantity);
 	}
+
+	async searchProductsByName(name: string): Promise<ProductDto[]> {
+		const products = await this.searchProductsByNameUseCase.execute(name);
+		return products.map(this.mapToProductDto);
+	}
+
+	async filterProductsByPrice(filters: PriceFilter): Promise<ProductDto[]> {
+		const products = await this.filterProductsByPriceUseCase.execute(filters);
+		return products.map(this.mapToProductDto);
+	  }
 
 	private mapToProductDto(product: Product): ProductDto {
 		return {

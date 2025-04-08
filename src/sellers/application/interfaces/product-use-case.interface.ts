@@ -6,5 +6,6 @@ export interface ProductUseCase {
 	getProductById(id: string): Promise<ProductDto | null>;
 	updateProduct(id: string, updateProductDto: CreateProductDto): Promise<ProductDto | null>;
 	deleteProduct(id: string): Promise<void>;
-	decreaseStock(productId: string, quantity: number): Promise<void>
+	decreaseStock(productId: string, quantity: number): Promise<void>;
+	searchProductsByName(name: string): Promise<ProductDto[]>;
 }

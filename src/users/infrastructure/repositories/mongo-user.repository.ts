@@ -13,7 +13,7 @@ export class MongoUserRepository implements UserRepository {
 		return user;
 	}
 
-	async getUserById(id: string): Promise<User | null> {
+	async getById(id: string): Promise<User | null> {
 		const user = await userModel.findById(id).exec();
 		if (!user) return null;
 

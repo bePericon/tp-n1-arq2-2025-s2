@@ -8,7 +8,8 @@ import mongoose from 'mongoose';
 import ApiResponse from '../../../shared/domain/value-objects/api-response';
 import { SellerService } from '../../application/services/seller-service';
 import { MongoSellerRepository } from '../repositories/mongo-seller.repository';
-import '../event-handlers/purchase-created.handler'
+import '../event-handlers/purchase-created.handler';
+import { PriceFilter } from '../../domain/use-cases/filter-products-by-price';
 
 @Controller('api/products')
 export class ProductController {
@@ -34,6 +35,46 @@ export class ProductController {
 		return res
 			.status(StatusCodes.CREATED)
 			.json(new ApiResponse('Producto creado', StatusCodes.CREATED, productDto));
+	}
+
+	@Get('search')
+	async searchProducts(req: Request, res: Response): Promise<Response> {
+		const name = req.query.name as string;
+		const products = await this.productService.searchProductsByName(name);
+
+		let textResponse = 'Productos encontrados';
+		if (products.length === 0) textResponse = 'No se ha encontrado ningún producto';
+
+		return res
+			.status(StatusCodes.OK)
+			.json(new ApiResponse(textResponse, StatusCodes.OK, products));
+	}
+
+	@Get('filter')
+	async filterProductsByPrice(req: Request, res: Response): Promise<Response> {
+		const filters: PriceFilter = {};
+
+		if (req.query.greaterThan) {
+			filters.greaterThan = parseFloat(req.query.greaterThan as string);
+		}
+		if (req.query.lessThan) {
+			filters.lessThan = parseFloat(req.query.lessThan as string);
+		}
+		if (req.query.min) {
+			filters.min = parseFloat(req.query.min as string);
+		}
+		if (req.query.max) {
+			filters.max = parseFloat(req.query.max as string);
+		}
+
+		const products = await this.productService.filterProductsByPrice(filters);
+
+		let textResponse = 'Productos encontrados';
+		if (products.length === 0) textResponse = 'No se ha encontrado ningún producto';
+
+		return res
+			.status(StatusCodes.OK)
+			.json(new ApiResponse(textResponse, StatusCodes.OK, products));
 	}
 
 	@Get(':id')
