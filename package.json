@@ -8,7 +8,7 @@
     "prod": "dotenvx run --env-file=.env.production -- nodemon -L ./src/main.ts",
     "start": "nodemon -L ./src/main.ts",
     "build": "tsc",
-    "test": "dotenvx run --env-file=.env.test -- cross-env NODE_ENV=test jest --silent --forceExit",
+    "test": "cross-env NODE_ENV=test jest --silent --forceExit",
     "lint": "eslint . --ext .ts --quiet",
     "lint:fix": "eslint . --ext .ts --quiet --fix",
     "lint:all": "eslint . --ext .ts"
