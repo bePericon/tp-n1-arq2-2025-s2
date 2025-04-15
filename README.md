@@ -40,6 +40,10 @@
     npm install
     ```
 
+4.  Create enviroment file:
+
+    - Copy ```.env.example``` and rename it for ```.env```
+
 ### Running the Project
 
 -   **Development Server:**
