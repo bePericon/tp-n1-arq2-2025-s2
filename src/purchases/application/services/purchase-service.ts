@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { Purchase } from '../../domain/entities/purchase';
 import { PurchaseRepository } from '../../domain/repositories/purchase-repository';
 import { CreatePurchase } from '../../domain/use-cases/create-purchase';
