@@ -27,16 +27,23 @@ export class PurchaseService implements PurchaseUseCase {
 		await axios.get(`${config.user_api_url}/${purchaseDto.userId}`);
 
 		// Verify product exist and it have enough stock
-		await axios.post(`${config.product_api_url}/${purchaseDto.productId}/purchase`, {
+		const {
+			data: { data: product },
+		} = await axios.get(
+			`${config.product_api_url}/${purchaseDto.productId}?quantity=${purchaseDto.quantity}`
+		);
+
+		// Update product stock
+		await axios.put(`${config.product_api_url}/${purchaseDto.productId}`, {
 			quantity: purchaseDto.quantity,
 		});
 
 		const createdPurchase = await this.createPurchaseUseCase.execute(
 			new Purchase({
 				productId: purchaseDto.productId,
-				name: purchaseDto.name,
-				description: purchaseDto.description,
-				price: purchaseDto.price,
+				name: product.name,
+				description: product.description,
+				price: product.price,
 				quantity: purchaseDto.quantity,
 				userId: purchaseDto.userId,
 			})
