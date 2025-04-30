@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import { Controller, Post,  } from '@overnightjs/core';
+import { Controller, Get, Post } from '@overnightjs/core';
 import { PurchaseService } from '../../application/services/purchase-service';
 import { CreatePurchaseDto } from '../../application/dtos/create-purchase.dto';
 import { StatusCodes } from 'http-status-codes';
 import ApiResponse from '../../../shared/domain/value-objects/api-response';
 import { MongoPurchaseRepository } from '../repositories/mongo-purchase.repository';
+import mongoose from 'mongoose';
 
 @Controller('api/purchases')
 export class PurchaseController {
@@ -13,6 +14,36 @@ export class PurchaseController {
 	constructor() {
 		const purchaseRepository = new MongoPurchaseRepository();
 		this.purchaseProduct = new PurchaseService(purchaseRepository);
+	}
+
+	@Get(':id')
+	async getPurchaseById(req: Request, res: Response): Promise<Response> {
+		if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+			const purchaseId = req.params.id;
+			const purchase = await this.purchaseProduct.getPurchaseById(purchaseId);
+
+			if (!purchase) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json(
+						new ApiResponse(
+							'Compra no encontrada',
+							StatusCodes.NOT_FOUND,
+							purchase
+						)
+					);
+			}
+
+			return res
+				.status(StatusCodes.OK)
+				.json(new ApiResponse('Compra encontrada', StatusCodes.OK, purchase));
+		}
+
+		return res
+			.status(StatusCodes.BAD_REQUEST)
+			.json(
+				new ApiResponse('Formato de Id incorrecto', StatusCodes.BAD_REQUEST, null)
+			);
 	}
 
 	@Post('')

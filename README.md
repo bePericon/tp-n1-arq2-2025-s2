@@ -83,6 +83,94 @@ project-root/
 
 ```
 
+### API Endpoints
+
+#### Users endpoints
+- POST: /api/users - Create user
+    ```json
+    {
+        "name": "Name",
+        "lastName": "Last name",
+        "mail": "email@email.com"
+    }
+    ```
+- GET: /api/users/:id - Get user by ID  
+- PUT: /api/users/:id - Update user by ID  
+    ```json
+    // It is possible to edit each field separately
+    {
+        "name": "Other Name",
+        //"lastName": "Last name",
+        //"mail": "email@email.com"
+    }
+    ```
+- DELETE: /api/users/:id - Delete user by ID
+
+
+#### Sellers endpoints
+- POST: /api/sellers - Create seller
+    ```json
+    {
+        "companyName": "Company Name",
+        "mail": "company.email@email.com"
+    }
+    ```
+- GET: /api/sellers/:id - Get seller by ID  
+- PUT: /api/sellers/:id - Update seller by ID  
+    ```json
+    // It is possible to edit each field separately
+    {
+        "companyName": "Other Company Name",
+        //"mail": "company.email@email.com"
+    }
+    ```
+- DELETE: /api/sellers/:id - Delete seller by ID
+
+
+#### Products endpoints
+- POST: /api/products - Create product
+    ```json
+    {
+        "name": "Product name",
+        "description": "Description",
+        "price": 1000,
+        "stock": 2,
+        "sellerId": "sellerId"
+    }
+    ```
+- GET: /api/products/:id - Get product by ID  
+- PUT: /api/products/:id - Update product by ID  
+    ```json
+    // It is possible to edit each field separately
+    {
+        //"name": "Product name",
+        "description": "Other description",
+        //"price": 1000,
+        //"stock": 2,
+    }
+    ```
+- DELETE: /api/products/:id - Delete product by ID
+- GET: /api/products/search?name=wordToSearch - Search products
+- GET: /api/products/filter?greaterThan=priceNumber - Filter products
+
+    - Filters: 
+        - greaterThan
+        - lessThan
+        - min
+        - max
+
+#### Purchases endpoints
+- POST: /api/purchases - Create purchase
+    ```json
+    {
+        "userId": "userId",
+        "quantity": 1,
+        "productId": "productId"
+    }
+    ```
+- GET: /api/purchases/:id - Get purchase by ID  
+
+
 ### Contact
 
 B. Emmanuel Pericon - brianpericon.e92@gmail.com

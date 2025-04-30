@@ -8,6 +8,7 @@ import { PurchaseUseCase } from '../interfaces/purchase-use-case.interface';
 import config from '../../../config/config';
 import { eventBus } from '../../../shared/infrastructure/event-bus/event-bus';
 import { PurchaseCreatedEvent } from '../../domain/events/purchase-created.event';
+import { GetPurchaseById } from '../../domain/use-cases/get-purchase-by-id';
 
 declare module 'axios' {
 	export interface AxiosError {
@@ -17,9 +18,16 @@ declare module 'axios' {
 
 export class PurchaseService implements PurchaseUseCase {
 	private readonly createPurchaseUseCase: CreatePurchase;
-
+	private readonly getPurchaseByIdUseCase: GetPurchaseById;
+	
 	constructor(readonly purchaseRepository: PurchaseRepository) {
 		this.createPurchaseUseCase = new CreatePurchase(purchaseRepository);
+		this.getPurchaseByIdUseCase = new GetPurchaseById(purchaseRepository);
+	}
+
+	async getPurchaseById(id: string): Promise<PurchaseDto | null> {
+		const purchase = await this.getPurchaseByIdUseCase.execute(id);
+		return purchase ? this.mapToPurchaseDto(purchase) : null;
 	}
 
 	async createPurchase(purchaseDto: CreatePurchaseDto): Promise<PurchaseDto> {

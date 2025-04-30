@@ -3,6 +3,13 @@ import { PurchaseRepository } from '../../domain/repositories/purchase-repositor
 import purchaseModel from '../models/purchase.model';
 
 export class MongoPurchaseRepository implements PurchaseRepository {
+	async getById(id: string): Promise<Purchase | null> {
+		const purchase = await purchaseModel.findById(id).exec();
+		if (!purchase) return null;
+
+		return this.mapModelToPurchase(purchase);
+	}
+
 	async save(entity: Purchase): Promise<Purchase> {
 		const createdPurchase = new purchaseModel({
 			productId: entity.productId,
@@ -15,5 +22,17 @@ export class MongoPurchaseRepository implements PurchaseRepository {
 
 		await createdPurchase.save();
 		return entity;
+	}
+
+	mapModelToPurchase(purchase: any): Purchase {
+		return new Purchase({
+			_id: purchase._id.toString(),
+			quantity: purchase.quantity,
+			productId: purchase.productId,
+			userId: purchase.userId,
+			name: purchase.name,
+			description: purchase.description,
+			price: purchase.price,
+		});
 	}
 }
