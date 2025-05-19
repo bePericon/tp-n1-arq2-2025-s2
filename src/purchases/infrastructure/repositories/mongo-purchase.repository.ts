@@ -33,6 +33,7 @@ export class MongoPurchaseRepository implements PurchaseRepository {
 			name: purchase.name,
 			description: purchase.description,
 			price: purchase.price,
+			sellerId: purchase.sellerId,
 		});
 	}
 }

@@ -1,9 +1,11 @@
 export interface PurchaseDto {
     purchaseId?: string;
-    productId: string;
+	userId: string;
+	quantity: number;
+
+	productId: string;
 	name: string;
 	description: string;
 	price: number;
-	userId: string;
-	quantity: number;
+	sellerId: string;
 }

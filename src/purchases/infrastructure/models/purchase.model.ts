@@ -5,6 +5,10 @@ const purchaseSchema = new mongoose.Schema({
 		type: mongoose.Schema.ObjectId,
 		ref: 'User',
 	},
+	quantity: {
+		type: Number,
+		require: true,
+	},
 	productId: {
 		type: String,
 		require: true,
@@ -21,8 +25,8 @@ const purchaseSchema = new mongoose.Schema({
 		type: Number,
 		require: true,
 	},
-	quantity: {
-		type: Number,
+	sellerId: {
+		type: String,
 		require: true,
 	},
 	createdAt: { type: Date, default: Date.now },

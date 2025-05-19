@@ -9,8 +9,6 @@ import customServer from 'express-promise-router';
 import cookieParser from 'cookie-parser';
 import { UserController } from './users/infrastructure/controllers/user.controller';
 import { connectMongoDB } from './config/database/mongo-config';
-import { SellerController } from './sellers/infrastructure/controllers/seller.controller';
-import { ProductController } from './sellers/infrastructure/controllers/product.controller';
 import errorMiddleware from './shared/infrastructure/error.middleware';
 import { PurchaseController } from './purchases/infrastructure/controllers/purchase.controller';
 
@@ -56,12 +54,10 @@ export class ServerApp extends Server {
 
 	private setupControllers(): void {
 		const userController = new UserController();
-		const sellerController = new SellerController();
-		const productController = new ProductController();
 		const purchaseController = new PurchaseController();
 
 		super.addControllers(
-			[userController, sellerController, productController, purchaseController],
+			[userController, purchaseController],
 			customServer
 		);
 	}
