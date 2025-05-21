@@ -7,6 +7,7 @@ import { PurchaseDto } from '../dtos/purchase.dto';
 import { PurchaseUseCase } from '../interfaces/purchase-use-case.interface';
 import config from '../../../config/config';
 import { GetPurchaseById } from '../../domain/use-cases/get-purchase-by-id';
+import { IEmailService } from '../../domain/services/email-service';
 
 declare module 'axios' {
 	export interface AxiosError {
@@ -17,10 +18,15 @@ declare module 'axios' {
 export class PurchaseService implements PurchaseUseCase {
 	private readonly createPurchaseUseCase: CreatePurchase;
 	private readonly getPurchaseByIdUseCase: GetPurchaseById;
-	
-	constructor(readonly purchaseRepository: PurchaseRepository) {
+	private readonly emailService: IEmailService;
+
+	constructor(
+		readonly purchaseRepository: PurchaseRepository,
+		readonly eService: IEmailService
+	) {
 		this.createPurchaseUseCase = new CreatePurchase(purchaseRepository);
 		this.getPurchaseByIdUseCase = new GetPurchaseById(purchaseRepository);
+		this.emailService = eService;
 	}
 
 	async getPurchaseById(id: string): Promise<PurchaseDto | null> {
@@ -50,10 +56,10 @@ export class PurchaseService implements PurchaseUseCase {
 				userId: purchaseDto.userId,
 				quantity: purchaseDto.quantity,
 				productId: purchaseDto.productId,
-				name: "", //product.name,
-				description: "", //product.description,
+				name: '', //product.name,
+				description: '', //product.description,
 				price: 0, //product.price,
-				sellerId: "", //product.sellerId,
+				sellerId: '', //product.sellerId,
 			})
 		);
 
@@ -64,6 +70,12 @@ export class PurchaseService implements PurchaseUseCase {
 		// 		quantity: purchaseDto.quantity,
 		// 	})
 		// );
+
+		const userEmail = 'brian.pericon@fravega.com.ar'; // User email
+		const subject = 'Confirmación de Compra';
+		const body = `Gracias por tu compra de ${purchaseDto.quantity} unidades del producto ${purchaseDto.productId}.`;
+
+		this.emailService.sendPurchaseConfirmationEmail(userEmail, subject, body);
 
 		return this.mapToPurchaseDto(createdPurchase);
 	}
@@ -78,7 +90,7 @@ export class PurchaseService implements PurchaseUseCase {
 			name: product.name,
 			description: product.description,
 			price: product.price,
-			sellerId: product.sellerId
+			sellerId: product.sellerId,
 		};
 	}
 }

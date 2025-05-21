@@ -11,16 +11,22 @@
     "test": "cross-env NODE_ENV=test jest --silent --forceExit",
     "lint": "eslint . --ext .ts --quiet",
     "lint:fix": "eslint . --ext .ts --quiet --fix",
-    "lint:all": "eslint . --ext .ts"
+    "lint:all": "eslint . --ext .ts",
+    "generate-proto": "mkdir -p generated && protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./generated --ts_proto_opt=grpc=grpc-js,forceLong=string -I ./proto ./proto/*.proto",
+    "clean-proto": "rimraf generated",
+    "prestart": "npm run clean-proto && npm run generate-proto && npm run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@dotenvx/dotenvx": "^0.44.4",
+    "@grpc/grpc-js": "^1.13.3",
+    "@grpc/proto-loader": "^0.7.15",
     "@overnightjs/core": "^1.7.6",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
+    "@types/nodemailer": "^6.4.17",
     "@typescript-eslint/parser": "^7.8.0",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
@@ -35,6 +41,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.3",
     "morgan": "^1.10.0",
+    "nodemailer": "^7.0.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "uuid": "^11.1.0",
@@ -55,9 +62,11 @@
     "jest": "^29.7.0",
     "mockingoose": "^2.16.2",
     "nodemon": "^3.1.0",
+    "rimraf": "^6.0.1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.2",
     "ts-node-dev": "^2.0.0",
+    "ts-proto": "^2.7.0",
     "typescript": "^5.4.5"
   }
 }

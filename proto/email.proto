@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package email;
+
+// Mensaje para representar la solicitud de envío de email
+message SendEmailRequest {
+  string to = 1;
+  string subject = 2;
+  string body = 3;
+}
+
+// Mensaje para representar la respuesta del envío de email
+message SendEmailResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Servicio de Email
+service EmailService {
+  rpc SendEmail (SendEmailRequest) returns (SendEmailResponse);
+}
