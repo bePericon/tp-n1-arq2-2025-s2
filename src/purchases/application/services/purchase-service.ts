@@ -8,6 +8,7 @@ import { PurchaseUseCase } from '../interfaces/purchase-use-case.interface';
 import config from '../../../config/config';
 import { GetPurchaseById } from '../../domain/use-cases/get-purchase-by-id';
 import { IEmailService } from '../../domain/services/email-service';
+import { productClient  } from '../../infrastructure/services/product-grpc-client';
 
 declare module 'axios' {
 	export interface AxiosError {
@@ -34,8 +35,13 @@ export class PurchaseService implements PurchaseUseCase {
 		return purchase ? this.mapToPurchaseDto(purchase) : null;
 	}
 
+	
+
+	
+
 	async createPurchase(purchaseDto: CreatePurchaseDto): Promise<PurchaseDto> {
 		// Verify user exist
+		console.log('Verificando URL usuario:', `${config.user_api_url}/${purchaseDto.userId}`);
 		await axios.get(`${config.user_api_url}/${purchaseDto.userId}`);
 
 		// TODO: connection with other service implementing RPC (gRPC)
@@ -50,16 +56,24 @@ export class PurchaseService implements PurchaseUseCase {
 		// await axios.put(`${config.product_api_url}/${purchaseDto.productId}`, {
 		// 	quantity: purchaseDto.quantity,
 		// });
-
+		console.log(purchaseDto.productId)
+		const product = await new Promise<any>((resolve, reject) => {
+			productClient.GetProductById({ productId: purchaseDto.productId }, (error: any, response: any) => {
+				if (error) return reject(error);
+				
+				resolve(response);
+			});
+		});
+		console.log(product)
 		const createdPurchase = await this.createPurchaseUseCase.execute(
 			new Purchase({
 				userId: purchaseDto.userId,
 				quantity: purchaseDto.quantity,
 				productId: purchaseDto.productId,
-				name: '', //product.name,
-				description: '', //product.description,
-				price: 0, //product.price,
-				sellerId: '', //product.sellerId,
+				name: product.name,
+				description: product.description,
+				price: product.price,
+				sellerId: product.sellerId
 			})
 		);
 
@@ -71,7 +85,19 @@ export class PurchaseService implements PurchaseUseCase {
 		// 	})
 		// );
 
-		const userEmail = 'brian.pericon@fravega.com.ar'; // User email
+		// Decrementar stock vía gRPC
+		await new Promise<void>((resolve, reject) => {
+			productClient.DecreaseStock(
+				{ productId: purchaseDto.productId, quantity: purchaseDto.quantity },
+				(err: any, response: any) => {
+					if (err) return reject(err);
+					if (!response.success) return reject(new Error('No se pudo decrementar el stock'));
+					resolve();
+				}
+			);
+		});
+
+		const userEmail = 'jeremiasfuentes77@gmail.com'; // User email
 		const subject = 'Confirmación de Compra';
 		const body = `Gracias por tu compra de ${purchaseDto.quantity} unidades del producto ${purchaseDto.productId}.`;
 
