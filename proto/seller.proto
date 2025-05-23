@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package seller;
+
+service SellerService {
+  rpc GetSellerById (GetSellerRequest) returns (SellerResponse);
+}
+
+message GetSellerRequest {
+  string sellerId = 1;
+}
+
+message SellerResponse {
+  string sellerId = 1;
+  string company_name = 2;
+  string mail = 3;
+  repeated string products = 4;
+}

@@ -7,6 +7,7 @@ import ApiResponse from '../../../shared/domain/value-objects/api-response';
 import { MongoPurchaseRepository } from '../repositories/mongo-purchase.repository';
 import mongoose from 'mongoose';
 import { GrpcEmailService } from '../services/grpc-email.service';
+import { GrpcProductService } from '../services/grpc-product.service';
 
 @Controller('api/purchases')
 export class PurchaseController {
@@ -15,9 +16,12 @@ export class PurchaseController {
 	constructor() {
 		const purchaseRepository = new MongoPurchaseRepository();
 
-		const NOTIFICATION_SERVICE_ADDRESS = 'localhost:50051';
+		const NOTIFICATION_SERVICE_ADDRESS = 'localhost:50053';
 		const emailService = new GrpcEmailService(NOTIFICATION_SERVICE_ADDRESS);
-		this.purchaseProduct = new PurchaseService(purchaseRepository, emailService);
+		const SELLERS_SERVICE_ADDRESS = 'localhost:50051';
+		const productService = new GrpcProductService(SELLERS_SERVICE_ADDRESS);
+
+		this.purchaseProduct = new PurchaseService(purchaseRepository, emailService, productService);
 	}
 
 	@Get(':id')
