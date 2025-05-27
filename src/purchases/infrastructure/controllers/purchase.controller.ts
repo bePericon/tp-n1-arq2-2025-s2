@@ -7,6 +7,8 @@ import ApiResponse from '../../../shared/domain/value-objects/api-response';
 import { MongoPurchaseRepository } from '../repositories/mongo-purchase.repository';
 import mongoose from 'mongoose';
 import { GrpcEmailService } from '../services/grpc-email.service';
+import { GrpcProductService } from '../services/grpc-product.service';
+import config from '../../../config/config';
 
 @Controller('api/purchases')
 export class PurchaseController {
@@ -15,9 +17,17 @@ export class PurchaseController {
 	constructor() {
 		const purchaseRepository = new MongoPurchaseRepository();
 
-		const NOTIFICATION_SERVICE_ADDRESS = 'localhost:50051';
-		const emailService = new GrpcEmailService(NOTIFICATION_SERVICE_ADDRESS);
-		this.purchaseProduct = new PurchaseService(purchaseRepository, emailService);
+		const emailService = new GrpcEmailService(
+			config.notification_service_address as string
+		);
+		const SELLERS_SERVICE_ADDRESS = 'localhost:50051';
+		const productService = new GrpcProductService(SELLERS_SERVICE_ADDRESS);
+
+		this.purchaseProduct = new PurchaseService(
+			purchaseRepository,
+			emailService,
+			productService
+		);
 	}
 
 	@Get(':id')
@@ -54,10 +64,40 @@ export class PurchaseController {
 	async createPurchase(req: Request, res: Response): Promise<Response> {
 		const purchaseDto: CreatePurchaseDto = req.body;
 
-		const purchase = await this.purchaseProduct.createPurchase(purchaseDto);
+		const statusPurchase = await this.purchaseProduct.createPurchase(purchaseDto);
+
+		if (!statusPurchase.existProduct) {
+			return res
+				.status(StatusCodes.BAD_REQUEST)
+				.json(
+					new ApiResponse(
+						'El producto no existe',
+						StatusCodes.BAD_REQUEST,
+						null
+					)
+				);
+		}
+
+		if (!statusPurchase.hasStock) {
+			return res
+				.status(StatusCodes.BAD_REQUEST)
+				.json(
+					new ApiResponse(
+						'El producto no tiene stock suficiente',
+						StatusCodes.BAD_REQUEST,
+						null
+					)
+				);
+		}
 
 		return res
 			.status(StatusCodes.OK)
-			.json(new ApiResponse('Producto comprado', StatusCodes.OK, purchase));
+			.json(
+				new ApiResponse(
+					'Producto comprado',
+					StatusCodes.OK,
+					statusPurchase.purchase
+				)
+			);
 	}
 }

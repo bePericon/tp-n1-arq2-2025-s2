@@ -8,4 +8,5 @@ export interface PurchaseDto {
 	description: string;
 	price: number;
 	sellerId: string;
+	sellerName: string
 }
