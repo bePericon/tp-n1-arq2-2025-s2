@@ -15,10 +15,14 @@ class MockPurchaseRepository implements PurchaseRepository {
 				name: purchaseDto.name,
 				description: purchaseDto.description,
 				price: purchaseDto.price,
+				sellerId: purchaseDto.sellerId
 			})
 		);
 	}
 	findById(id: string): Promise<Purchase | null> {
+		throw new Error('Method not implemented.');
+	}
+	getById(id: string): Promise<Purchase | null> {
 		throw new Error('Method not implemented.');
 	}
 	findAll(): Promise<Purchase[]> {
@@ -49,6 +53,7 @@ describe('CreatePurchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
+			sellerId: 'seller123'
 		};
 
 		const result = await createPurchase.execute(purchaseDto);
@@ -71,6 +76,7 @@ describe('CreatePurchase', () => {
 			name: 'Another Product',
 			description: 'Another description',
 			price: 5.99,
+			sellerId: 'seller123'
 		};
 		const purchaseDto2: PurchaseDto = {
 			userId: 'user111',
@@ -79,6 +85,7 @@ describe('CreatePurchase', () => {
 			name: 'Product 2',
 			description: 'Description 2',
 			price: 100,
+			sellerId: 'seller1234'
 		};
 
 		const result1 = await createPurchase.execute(purchaseDto1);
@@ -111,6 +118,7 @@ describe('CreatePurchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
+			sellerId: 'seller123'
 		};
 		const saveSpy = jest.spyOn(mockPurchaseRepository, 'save');
 
