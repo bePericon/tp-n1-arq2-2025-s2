@@ -12,6 +12,7 @@ import { SendPurchaseEmail } from '../../domain/use-cases/send-purchase-email';
 import { GetProductById } from '../../domain/use-cases/get-product-by-id';
 import { IProductService } from '../../domain/services/product-service';
 import { DecreaseProductStock } from '../../domain/use-cases/decrease-product-stock';
+import { StatusPurchaseDto } from '../dtos/status-purchase.dto';
 
 declare module 'axios' {
 	export interface AxiosError {
@@ -24,7 +25,7 @@ export class PurchaseService implements PurchaseUseCase {
 	private readonly getPurchaseByIdUseCase: GetPurchaseById;
 	private readonly sendPurchaseEmailUseCase: SendPurchaseEmail;
 	private readonly getProductByIdUseCase: GetProductById;
-	private readonly decreaseProductStockUseCase: DecreaseProductStock
+	private readonly decreaseProductStockUseCase: DecreaseProductStock;
 
 	constructor(
 		readonly purchaseRepository: PurchaseRepository,
@@ -43,28 +44,23 @@ export class PurchaseService implements PurchaseUseCase {
 		return purchase ? this.mapToPurchaseDto(purchase) : null;
 	}
 
-	async createPurchase(purchaseDto: CreatePurchaseDto): Promise<PurchaseDto> {
+	async createPurchase(purchaseDto: CreatePurchaseDto): Promise<StatusPurchaseDto> {
 		// Verify user exist
-		console.log(
-			'Verificando URL usuario:',
-			`${config.user_api_url}/${purchaseDto.userId}`
-		);
-		await axios.get(`${config.user_api_url}/${purchaseDto.userId}`);
+		const {
+			data: { data: user },
+		} = await axios.get(`${config.user_api_url}/${purchaseDto.userId}`);
 
-		// Verify product exist and it have enough stock
-		// const product = await new Promise<any>((resolve, reject) => {
-		// 	productClient.GetProductById(
-		// 		{ productId: purchaseDto.productId },
-		// 		(error: any, response: any) => {
-		// 			if (error) return reject(error);
-
-		// 			resolve(response);
-		// 		}
-		// 	);
-		// });
+		// Verify product exist and enough stock
 		const product = await this.getProductByIdUseCase.execute(purchaseDto.productId);
-		console.log("🚀 ~ PurchaseService ~ createPurchase ~ product:", product)
-		
+		if (!product) {
+			return this.mapToStatusPurchaseDto(false, false, null);
+		}
+		const hasStock = product.stock >= purchaseDto.quantity;
+		if (!hasStock) {
+			return this.mapToStatusPurchaseDto(true, false, null);
+		}
+
+		// Create purchase
 		const createdPurchase = await this.createPurchaseUseCase.execute(
 			new Purchase({
 				userId: purchaseDto.userId,
@@ -74,30 +70,35 @@ export class PurchaseService implements PurchaseUseCase {
 				description: product.description,
 				price: product.price,
 				sellerId: product.sellerId,
+				sellerName: product.sellerName,
 			})
 		);
 
-		this.decreaseProductStockUseCase.execute(purchaseDto.productId, purchaseDto.quantity);
-		// Update product stock
-		// await new Promise<void>((resolve, reject) => {
-		// 	productClient.DecreaseStock(
-		// 		{ productId: purchaseDto.productId, quantity: purchaseDto.quantity },
-		// 		(err: any, response: any) => {
-		// 			if (err) return reject(err);
-		// 			if (!response.success)
-		// 				return reject(new Error('No se pudo decrementar el stock'));
-		// 			resolve();
-		// 		}
-		// 	);
-		// });
+		this.decreaseProductStockUseCase.execute(
+			purchaseDto.productId,
+			purchaseDto.quantity
+		);
 
-		const userEmail = 'brian.pericon@fravega.com.ar'; // User email
-		const subject = 'Confirmación de Compra';
-		const body = `Gracias por tu compra de ${purchaseDto.quantity} unidades del producto ${createdPurchase.name}.`;
+		const userEmail = user.mail;
+		const subjectForUser = 'Confirmación de Compra';
+		const bodyForUser = `Gracias por tu compra de ${purchaseDto.quantity} unidades del producto ${createdPurchase.name}.`;
 
-		this.sendPurchaseEmailUseCase.execute(userEmail, subject, body);
+		const sellerEmail = product.sellerMail;
+		const subjectForSeller = 'Confirmación de Venta';
+		const bodyForSeller = `Se efectuó la compra del producto: ${createdPurchase.name}, en unidades: ${purchaseDto.quantity}.`;
 
-		return this.mapToPurchaseDto(createdPurchase);
+		this.sendPurchaseEmailUseCase.execute(userEmail, subjectForUser, bodyForUser);
+		this.sendPurchaseEmailUseCase.execute(
+			sellerEmail,
+			subjectForSeller,
+			bodyForSeller
+		);
+
+		return this.mapToStatusPurchaseDto(
+			true,
+			true,
+			this.mapToPurchaseDto(createdPurchase)
+		);
 	}
 
 	private mapToPurchaseDto(product: Purchase): PurchaseDto {
@@ -111,6 +112,19 @@ export class PurchaseService implements PurchaseUseCase {
 			description: product.description,
 			price: product.price,
 			sellerId: product.sellerId,
+			sellerName: product.sellerName,
+		};
+	}
+
+	private mapToStatusPurchaseDto(
+		existProduct: boolean,
+		hasStock: boolean,
+		purchaseDto: PurchaseDto | null
+	): StatusPurchaseDto {
+		return {
+			existProduct,
+			hasStock,
+			purchase: purchaseDto,
 		};
 	}
 }

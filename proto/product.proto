@@ -18,6 +18,8 @@ message ProductResponse {
   double price = 4;
   int32 stock = 5;
   string sellerId = 6;
+  string sellerName = 7;
+  string sellerMail = 8;
 }
 
 message DecreaseStockRequest {

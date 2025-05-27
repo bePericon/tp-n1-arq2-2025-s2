@@ -34,6 +34,7 @@ export class MongoPurchaseRepository implements PurchaseRepository {
 			description: purchase.description,
 			price: purchase.price,
 			sellerId: purchase.sellerId,
+			sellerName: purchase.sellerName,
 		});
 	}
 }

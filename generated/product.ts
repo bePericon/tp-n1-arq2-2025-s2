@@ -20,6 +20,8 @@ export interface ProductResponse {
   price: number;
   stock: number;
   sellerId: string;
+  sellerName: string;
+  sellerMail: string;
 }
 
 export interface DecreaseStockRequest {
@@ -90,7 +92,7 @@ export const GetProductRequest: MessageFns<GetProductRequest> = {
 };
 
 function createBaseProductResponse(): ProductResponse {
-  return { productId: "", name: "", description: "", price: 0, stock: 0, sellerId: "" };
+  return { productId: "", name: "", description: "", price: 0, stock: 0, sellerId: "", sellerName: "", sellerMail: "" };
 }
 
 export const ProductResponse: MessageFns<ProductResponse> = {
@@ -112,6 +114,12 @@ export const ProductResponse: MessageFns<ProductResponse> = {
     }
     if (message.sellerId !== "") {
       writer.uint32(50).string(message.sellerId);
+    }
+    if (message.sellerName !== "") {
+      writer.uint32(58).string(message.sellerName);
+    }
+    if (message.sellerMail !== "") {
+      writer.uint32(66).string(message.sellerMail);
     }
     return writer;
   },
@@ -171,6 +179,22 @@ export const ProductResponse: MessageFns<ProductResponse> = {
           message.sellerId = reader.string();
           continue;
         }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.sellerName = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.sellerMail = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -188,6 +212,8 @@ export const ProductResponse: MessageFns<ProductResponse> = {
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       stock: isSet(object.stock) ? globalThis.Number(object.stock) : 0,
       sellerId: isSet(object.sellerId) ? globalThis.String(object.sellerId) : "",
+      sellerName: isSet(object.sellerName) ? globalThis.String(object.sellerName) : "",
+      sellerMail: isSet(object.sellerMail) ? globalThis.String(object.sellerMail) : "",
     };
   },
 
@@ -211,6 +237,12 @@ export const ProductResponse: MessageFns<ProductResponse> = {
     if (message.sellerId !== "") {
       obj.sellerId = message.sellerId;
     }
+    if (message.sellerName !== "") {
+      obj.sellerName = message.sellerName;
+    }
+    if (message.sellerMail !== "") {
+      obj.sellerMail = message.sellerMail;
+    }
     return obj;
   },
 
@@ -225,6 +257,8 @@ export const ProductResponse: MessageFns<ProductResponse> = {
     message.price = object.price ?? 0;
     message.stock = object.stock ?? 0;
     message.sellerId = object.sellerId ?? "";
+    message.sellerName = object.sellerName ?? "";
+    message.sellerMail = object.sellerMail ?? "";
     return message;
   },
 };

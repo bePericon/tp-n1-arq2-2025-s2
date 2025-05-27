@@ -8,6 +8,7 @@ export interface PurchaseProps {
 	description: string;
 	price: number;
 	sellerId: string;
+	sellerName: string;
 }
 
 export class Purchase {
@@ -20,6 +21,7 @@ export class Purchase {
 	public description: string;
 	public price: number;
 	public sellerId: string;
+	public sellerName: string;
 
 	constructor(props: PurchaseProps) {
 		this._id = props._id;
@@ -31,5 +33,6 @@ export class Purchase {
 		this.description = props.description;
 		this.price = props.price;
 		this.sellerId = props.sellerId;
+		this.sellerName = props.sellerName;
 	}
 }
