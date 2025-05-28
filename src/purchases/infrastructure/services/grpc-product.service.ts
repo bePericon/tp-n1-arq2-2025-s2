@@ -25,6 +25,8 @@ interface ProductGrpcClient {
 	): grpc.ClientUnaryCall;
 }
 
+
+
 export class GrpcProductService implements IProductService {
 	private client: ProductGrpcClient;
 	private readonly serviceAddress: string;
