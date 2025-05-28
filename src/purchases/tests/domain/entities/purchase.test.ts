@@ -9,7 +9,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 
 		const purchase = new Purchase(props);
@@ -34,7 +35,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 
 		const purchase = new Purchase(props);
@@ -58,7 +60,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 		const props2: PurchaseProps = {
 			userId: 'user123',
@@ -67,7 +70,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 		const props3: PurchaseProps = {
 			userId: 'user123',
@@ -76,7 +80,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 10.99,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 
 		const purchase1 = new Purchase(props1);
@@ -96,7 +101,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 0,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 		const props2: PurchaseProps = {
 			userId: 'user123',
@@ -105,7 +111,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 100,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 		const props3: PurchaseProps = {
 			userId: 'user123',
@@ -114,7 +121,8 @@ describe('Purchase', () => {
 			name: 'Test Product',
 			description: 'This is a test product',
 			price: 99.99,
-			sellerId: 'seller123'
+			sellerId: 'seller123',
+			sellerName: 'seller123'
 		};
 
 		const purchase1 = new Purchase(props1);
