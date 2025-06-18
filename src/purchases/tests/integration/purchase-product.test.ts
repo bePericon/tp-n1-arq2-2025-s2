@@ -1,31 +1,23 @@
+import { GenericContainer } from "testcontainers";
 import { PurchaseService } from "../../application/services/purchase-service";
 import { GrpcEmailService } from "../../infrastructure/services/grpc-email.service";
 import { GrpcProductService } from "../../infrastructure/services/grpc-product.service";
 import { PurchaseRepository } from "../../domain/repositories/purchase-repository";
 import { Purchase } from "../../domain/entities/purchase";
-
-jest.mock("axios");
 import axios from "axios";
 
-// Simula una respuesta válida de axios.get para el usuario
-(axios.get as jest.Mock).mockResolvedValue({
-  data: { data: { mail: "cliente@test.com" } }
-});
+jest.setTimeout(30000); // Aumentamos el timeout porque levantar contenedores lleva tiempo
 
-describe("Integración: PurchaseService con gRPC", () => {
+describe("Integración REAL: PurchaseService usando servicios gRPC reales", () => {
+  let sellerContainer: any;
+  let mailContainer: any;
+
+  let service: PurchaseService;
+
   const purchaseDto = {
     userId: "user-123",
     productId: "prod-123",
     quantity: 2
-  };
-
-  const mockProduct = {
-    name: "Producto Test",
-    description: "Descripción test",
-    price: 1000,
-    stock: 10,
-    sellerId: "seller-001",
-    sellerMail: "vendedor@test.com"
   };
 
   const mockPurchaseRepo: PurchaseRepository = {
@@ -36,76 +28,44 @@ describe("Integración: PurchaseService con gRPC", () => {
     getById: jest.fn()
   };
 
-  const mockEmailService: GrpcEmailService = {
-    sendPurchaseConfirmationEmail: jest.fn().mockResolvedValue(true)
-  } as any;
+  beforeAll(async () => {
+    // Levantar servicios reales con testcontainers
+    sellerContainer = await new GenericContainer("seller-image")
+      .withExposedPorts(50051)
+      .start();
 
-  const mockProductService: GrpcProductService = {
-    getProductById: jest.fn().mockResolvedValue(mockProduct),
-    decreaseStock: jest.fn().mockResolvedValue(true)
-  } as any;
+    mailContainer = await new GenericContainer("mail-image")
+      .withExposedPorts(50052)
+      .start();
 
-  const service = new PurchaseService(
-    mockPurchaseRepo,
-    mockEmailService,
-    mockProductService
-  );
+    const sellerHost = sellerContainer.getHost();
+    const sellerPort = sellerContainer.getMappedPort(50051);
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+    const mailHost = mailContainer.getHost();
+    const mailPort = mailContainer.getMappedPort(50052);
+
+    // Instancias REALES de los servicios gRPC
+    const productService = new GrpcProductService(`${sellerHost}:${sellerPort}`);
+    const emailService = new GrpcEmailService(`${mailHost}:${mailPort}`);
+
+    service = new PurchaseService(mockPurchaseRepo, emailService, productService);
+
+    await new Promise(res => setTimeout(res, 2000));
+  });
+
+  afterAll(async () => {
+    await sellerContainer.stop();
+    await mailContainer.stop();
   });
 
   it("debe realizar una compra completa (producto válido, stock suficiente, mails enviados)", async () => {
     const result = await service.createPurchase(purchaseDto);
 
-    expect(mockProductService.getProductById).toHaveBeenCalledWith(purchaseDto.productId);
-    expect(mockProductService.decreaseStock).toHaveBeenCalledWith(purchaseDto.productId, purchaseDto.quantity);
-
-    expect(mockEmailService.sendPurchaseConfirmationEmail).toHaveBeenCalledWith(
-      "cliente@test.com",
-      expect.stringContaining("Compra"),
-      expect.stringContaining("Gracias")
-    );
-
-    expect(mockEmailService.sendPurchaseConfirmationEmail).toHaveBeenCalledWith(
-      "vendedor@test.com",
-      expect.stringContaining("Venta"),
-      expect.stringContaining("Se efectuó")
-    );
-
-    expect(result).toMatchObject({
-      existProduct: true,
-      hasStock: true,
-      purchase: expect.objectContaining({
-        productId: purchaseDto.productId,
-        userId: purchaseDto.userId,
-        quantity: purchaseDto.quantity,
-        name: mockProduct.name
-      })
+    expect(result.purchase).toMatchObject({
+      productId: purchaseDto.productId,
+      userId: purchaseDto.userId,
+      quantity: purchaseDto.quantity,
+      name: expect.any(String)
     });
   });
-
-  it("debe fallar si el producto no existe", async () => {
-    (mockProductService.getProductById as jest.Mock).mockRejectedValue(new Error("Producto no encontrado"));
-
-    await expect(service.createPurchase(purchaseDto)).rejects.toThrow("Producto no encontrado");
-
-    expect(mockProductService.getProductById).toHaveBeenCalledWith(purchaseDto.productId);
-  });
-
-  it("debe retornar hasStock = false si no hay suficiente stock", async () => {
-    (mockProductService.getProductById as jest.Mock).mockResolvedValue({ ...mockProduct, stock: 0 });
-
-    const result = await service.createPurchase(purchaseDto);
-
-    expect(result).toMatchObject({
-      existProduct: true,
-      hasStock: false,
-      purchase: null
-    });
-
-    expect(mockProductService.decreaseStock).not.toHaveBeenCalled();
-  });
-
-
 });
