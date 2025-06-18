@@ -29,7 +29,6 @@ describe("Integración REAL: PurchaseService usando servicios gRPC reales", () =
   };
 
   beforeAll(async () => {
-    // Levantar servicios reales con testcontainers
     sellerContainer = await new GenericContainer("seller-image")
       .withExposedPorts(50051)
       .start();
@@ -44,7 +43,6 @@ describe("Integración REAL: PurchaseService usando servicios gRPC reales", () =
     const mailHost = mailContainer.getHost();
     const mailPort = mailContainer.getMappedPort(50052);
 
-    // Instancias REALES de los servicios gRPC
     const productService = new GrpcProductService(`${sellerHost}:${sellerPort}`);
     const emailService = new GrpcEmailService(`${mailHost}:${mailPort}`);
 
@@ -67,5 +65,38 @@ describe("Integración REAL: PurchaseService usando servicios gRPC reales", () =
       quantity: purchaseDto.quantity,
       name: expect.any(String)
     });
+  });
+
+  it("debe fallar si el producto no existe", async () => {
+    const invalidDto = { ...purchaseDto, productId: "producto-inexistente" };
+
+    await expect(service.createPurchase(invalidDto)).rejects.toThrow("Producto no encontrado");
+  });
+
+  it("debe fallar si no hay stock suficiente", async () => {
+    const dtoSinStock = { ...purchaseDto, quantity: 9999 };
+
+    await expect(service.createPurchase(dtoSinStock)).rejects.toThrow("Stock insuficiente");
+  });
+
+
+
+  it("debe reducir el stock del producto", async () => {
+    const mockUpdateStock = jest.fn();
+    const productService = {
+      getProductById: jest.fn(() => ({
+        productId: "prod-123",
+        name: "Producto Test",
+        price: 100,
+        stock: 10,
+      })),
+      reduceProductStock: mockUpdateStock
+    };
+
+    const serviceStock = new PurchaseService(mockPurchaseRepo, {} as any, productService as any);
+
+    await serviceStock.createPurchase(purchaseDto);
+
+    expect(mockUpdateStock).toHaveBeenCalledWith("prod-123", 2);
   });
 });
