@@ -8,7 +8,7 @@
 
 ## Features
 
--   **User, Seller and Product Management:** Create, read, update, and delete.
+-   **User Management:** Create, read, update, and delete.
 -   **Purchase Management:** Create purchases.
 -   **Clean Architecture:** Organized into domain, application, and infrastructure layers.
 -   **Unit Testing:** Comprehensive unit tests using Jest about domain layer.
@@ -105,59 +105,6 @@ project-root/
     }
     ```
 - DELETE: /api/users/:id - Delete user by ID
-
-
-#### Sellers endpoints
-- POST: /api/sellers - Create seller
-    ```json
-    {
-        "companyName": "Company Name",
-        "mail": "company.email@email.com"
-    }
-    ```
-- GET: /api/sellers/:id - Get seller by ID  
-- PUT: /api/sellers/:id - Update seller by ID  
-    ```json
-    // It is possible to edit each field separately
-    {
-        "companyName": "Other Company Name",
-        //"mail": "company.email@email.com"
-    }
-    ```
-- DELETE: /api/sellers/:id - Delete seller by ID
-
-
-#### Products endpoints
-- POST: /api/products - Create product
-    ```json
-    {
-        "name": "Product name",
-        "description": "Description",
-        "price": 1000,
-        "stock": 2,
-        "sellerId": "sellerId"
-    }
-    ```
-- GET: /api/products/:id - Get product by ID  
-- PUT: /api/products/:id - Update product by ID  
-    ```json
-    // It is possible to edit each field separately
-    {
-        //"name": "Product name",
-        "description": "Other description",
-        //"price": 1000,
-        //"stock": 2,
-    }
-    ```
-- DELETE: /api/products/:id - Delete product by ID
-- GET: /api/products/search?name=wordToSearch - Search products
-- GET: /api/products/filter?greaterThan=priceNumber - Filter products
-
-    - Filters: 
-        - greaterThan
-        - lessThan
-        - min
-        - max
 
 #### Purchases endpoints
 - POST: /api/purchases - Create purchase
